@@ -37,7 +37,7 @@ void CholeskyDecomp(double *B, int n)
 
 void LDLDecomp(double *B, double *D, int n)
 {
-	//LDL Decomp
+	//LDL Decomp --- fixed on 04/07/2017
 	//where B = L * D * L'
 	//replace B with L, D (vector) with D
 	
