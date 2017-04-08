@@ -48,32 +48,40 @@ void LDLDecomp(double *B, double *D, int n)
 	//LDL Decomp
 	//where B = L * D * L'
 	//replace B with L, D (vector) with D
-
-	//float L[n][n];
+	
+	float V[n], s;
 	int i, j, k;
 
 	for (i = 0; i < n; i++)
 	{
-		//D[i] = B[i*n + i];
-		D[i] = B[i*n + i];
 		for (j = 0; j < i; j++)
 		{
-			//L[i][j] = B[i*n + j];
-			B[i*n + j] = B[i*n + j];
-			for (k = 0; k < j; k++)
-			{
-				//L[i][j] -= L[i][k] * D[k] * L[j][k];
-				B[i*n + j] -= B[i*n + k] * D[k] * B[j*n + k];
-			}
-			//L[i][j] /= D[j];
-			B[i*n + j] /= D[j];
-			//L[j][i] = 0.0;
-			B[j*n + i] = 0.0;
-			//D[i] -= L[i][j] * D[j] * L[i][j];
-			D[i] -= B[i*n + j] * D[j] * B[i*n + j];
+			V[j] = B[i*n + j] * D[j];
 		}
-		//L[i][i] = 1.0;
+		
+		s = 0.0;
+		for (j = 0; j < i; j++)
+		{
+			s += B[i*n + j] * V[j];
+		}
+		V[i] = B[i*n + i] - s;
+		D[i] = V[i];
+		
+		for (k = 1; i+k < n; k++)
+		{
+			s = 0.0;
+			for (j = 0; j < i; j++)
+			{
+				s += B[(i+k)*n + j] * V[j];
+			}
+			B[(i+k)*n + i] = (B[(i+k)*n + i] - s) / V[i];
+		}
+		
 		B[i*n + i] = 1.0;
+		for (j = 0; j < i; j++)
+		{
+			B[j*n + i] = 0.0;
+		}
 	}
 }
 
