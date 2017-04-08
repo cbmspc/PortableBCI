@@ -353,9 +353,7 @@ void LDA(double *mu1, double *mu2, double *S1, double *S2, double *w, int n1, in
 		}
 	}
 	
-	// check if Sw is rank deficient
-	// if it's not use lda
-	// if it is run PCA
+	// check if Sw is rank deficient: if it's not use lda, if it is run PCA
 	// to enable PCA step, replace "if (true)" with the 2 lines below 
 	
 	//det(Sw, d, n);
