@@ -14,31 +14,23 @@ void CholeskyDecomp(double *B, int n)
 	//Cholesky Decomp
 	//where B = L * L'
 	//replace B with L
-
-	//float L[n][n];
+	
 	int i, j, k;
 
 	for (i = 0; i < n; i++)
 	{
-		//L[i][i] = B[i*n + i];
 		B[i*n + i] = B[i*n + i];
 		for (j = 0; j < i; j++)
 		{
-			//L[i][j] = B[i*n + j];
 			B[i*n + j] = B[i*n + j];
 			for (k = 0; k < j; k++)
 			{
-				//L[i][j] -= L[i][k] * L[j][k];
 				B[i*n + j] -= B[i*n + k] * B[j*n + k];
 			}
-			//L[i][j] /= L[j][j];
 			B[i*n + j] /= B[j*n + j];
-			//L[j][i] = 0.0;
 			B[j*n + i] = 0.0;
-			//L[i][i] -= pow(L[i][j],2.0);
 			B[i*n + i] -= pow(B[i*n + j],2.0);
 		}
-		//L[i][i] = sqrt(L[i][i]);
 		B[i*n + i] = sqrt(B[i*n + i]);
 	}
 }
@@ -108,7 +100,6 @@ void det(double *A, double d, int n)
 	}
 
 }
-
 
 void LowerTriangularInverse(double *L, int n)
 {
