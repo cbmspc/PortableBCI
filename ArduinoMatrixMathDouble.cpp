@@ -37,7 +37,7 @@ void CholeskyDecomp(double *B, int n)
 
 void LDLDecomp(double *B, double *D, int n)
 {
-	//LDL Decomp --- fixed on 04/07/2017
+	//LDL Decomp --- fixed on 04/07/2017 but untested
 	//where B = L * D * L'
 	//replace B with L, D (vector) with D
 	
@@ -255,26 +255,7 @@ void GeneralizedSelfAdjointEigSolver(double* A, double* B, double* w, int n)//Sb
 	double C[n*n], w_tmp[n], l, D[n];
 
 	CholeskyDecomp(B, n); // L where L * L^T = B
-
-	//LDLDecomp(B, D, n); //where B = L * D * L', replace B with L, D (vector) with D   --------- DON'T USE LDL - 6/24/2016
-	
-	//int i, j;
-	//Serial.println("L");
-	//for (i = 0; i < n; i++)
-	//{
-	//	for (j = 0; j < n-1; j++)
-	//	{
-	//		Serial.print(B[i*n + j],4);
-	//		Serial.print(',');
-	//	}
-	//	Serial.println(B[i*n + n-1],4);
-	//}
-
-	//Serial.println("D");
-	//for (i = 0; i < n; i++)
-	//{
-	//	Serial.println(D[i], 4);
-	//}
+	//LDLDecomp(B, D, n); //where B = L * D * L', replace B with L, D (vector) with D --- LDLDecomp fixed 04/07/2017 but untested
 
 	LowerTriangularInverse(B, n); // L^-1
 
@@ -347,7 +328,7 @@ void LDA(double *mu1, double *mu2, double *S1, double *S2, double *w, int n1, in
 {
 	// DOES NOT change S1 and S2 (covariance matrices of class 1 and 2)
 	// useful output is w
-	// utilizes a PCA step to ensure nondegenerate matrix
+	// utilizes a PCA step to ensure nondegenerate matrix !!if enabled below!!
 
 	int i, j, k;
 	int ntot = n1 + n2;
@@ -377,85 +358,64 @@ void LDA(double *mu1, double *mu2, double *S1, double *S2, double *w, int n1, in
 			Sb[i*n + j] = p1*mu1[i] * mu1[j] + p2*mu2[i] * mu2[j] - mu[i] * mu[j];
 		}
 	}
-
-	//Serial.println("Sw");
-	//for (i = 0; i < n; i++)
-	//{
-	//	for (j = 0; j < n-1; j++)
-	//	{
-	//		Serial.print(Sw[i*n + j],4);
-	//		Serial.print(',');
-	//	}
-	//	Serial.println(Sw[i*n + n-1],4);
-	//}
-
-	//Serial.println("Sb");
-	//for (i = 0; i < n; i++)
-	//{
-	//	for (j = 0; j < n - 1; j++)
-	//	{
-	//		Serial.print(Sb[i*n + j],4);
-	//		Serial.print(',');
-	//	}
-	//	Serial.println(Sb[i*n + n - 1],4);
-	//}
-
-
-	GeneralizedSelfAdjointEigSolver(Sb, Sw, w, n);
-	//// check if Sw is rank deficient
-	//// if it's not use lda
-	//// if it is run PCA
+	
+	// check if Sw is rank deficient
+	// if it's not use lda
+	// if it is run PCA
+	// to enable PCA step, replace "if (true)" with the 2 lines below 
+	
 	//det(Sw, d, n);
 	//if (d > .0000000001) // 10^-10
-	//{
-	//	// run lda
-	//	GeneralizedSelfAdjointEigSolver(Sb, Sw, w, n);
-	//}
-	//else 
-	//{
-	//	// run PCA
-	//	double S[n*n];
+	if (true)
+	{
+		// run lda
+		GeneralizedSelfAdjointEigSolver(Sb, Sw, w, n);
+	}
+	else 
+	{
+		// run PCA
+		double S[n*n];
 
-	//	// calculate total covariance matrix (S)
-	//	for (i = 0; i < n; i++)
-	//	{
-	//		for (j = 0; j < n; j++)
-	//		{
-	//			S[i*n + j] = Sw[i*n + j] + Sb[i*n + j];
-	//		}
-	//	}
+		// calculate total covariance matrix (S)
+		for (i = 0; i < n; i++)
+		{
+			for (j = 0; j < n; j++)
+			{
+				S[i*n + j] = Sw[i*n + j] + Sb[i*n + j];
+			}
+		}
 
-	//	int nk = 0;
-	//	PCA(S, nk, n);
+		int nk = 0;
+		PCA(S, nk, n);
 
-	//	double K[n*nk], KT[nk*n];
+		double K[n*nk], KT[nk*n];
 
-	//	for (i = 0; i < n; i++)
-	//	{
-	//		for (j = 0; j < nk; j++)
-	//		{
-	//			K[i*nk + j] = S[i*n + j];
-	//		}
-	//	}
+		for (i = 0; i < n; i++)
+		{
+			for (j = 0; j < nk; j++)
+			{
+				K[i*nk + j] = S[i*n + j];
+			}
+		}
 
-	//	MatrixTranspose(K, KT, n, nk);
+		MatrixTranspose(K, KT, n, nk);
 
-	//	// project data to principal components before running lda
-	//	double Sk_tmp[n*nk], Swk[nk*nk], Sbk[nk*nk], wk[nk];
+		// project data to principal components before running lda
+		double Sk_tmp[n*nk], Swk[nk*nk], Sbk[nk*nk], wk[nk];
 
-	//	MatrixMultiply(Sw, K, Sk_tmp, n, n, nk); //Swk
-	//	MatrixMultiply(KT, Sk_tmp, Swk, nk, n, nk); //Swk
+		MatrixMultiply(Sw, K, Sk_tmp, n, n, nk); //Swk
+		MatrixMultiply(KT, Sk_tmp, Swk, nk, n, nk); //Swk
 
-	//	MatrixMultiply(Sb, K, Sk_tmp, n, n, nk); //Sbk
-	//	MatrixMultiply(KT, Sk_tmp, Sbk, nk, n, nk); //Sbk
+		MatrixMultiply(Sb, K, Sk_tmp, n, n, nk); //Sbk
+		MatrixMultiply(KT, Sk_tmp, Sbk, nk, n, nk); //Sbk
 
-	//	// run lda
-	//	GeneralizedSelfAdjointEigSolver(Sbk, Swk, wk, nk);
+		// run lda
+		GeneralizedSelfAdjointEigSolver(Sbk, Swk, wk, nk);
 
-	//	// find projection from original space that incorporates 
-	//	// principal components and lda vector
-	//	MatrixMultiply(K, wk, w, n, nk, 1);
+		// find projection from original space that incorporates 
+		// principal components and lda vector
+		MatrixMultiply(K, wk, w, n, nk, 1);
 
-	//}
+	}
 
 }
