@@ -107,26 +107,20 @@ void LowerTriangularInverse(double *L, int n)
 	//for L^-1 by
 	//replacing L with L^-1
 
-	//float Li[n][n];
 	int i, j, k;
 
 	for (i = 0; i < n; i++)
 	{
 		for (j = 0; j < i; j++)
 		{
-			//Li[i][j] = 0.0;
 			L[i*n + j] = -L[i*n + j] * L[j*n + j]; // use float s if this doesnt work
 			for (k = j + 1; k < i; k++)
 			{
-				//Li[i][j] -= L[i*n + k] * Li[k][j];
 				L[i*n + j] -= L[i*n + k] * L[k*n + j];
 			}
-			//Li[i][j] /= L[i*n + i];
 			L[i*n + j] /= L[i*n + i];
-			//Li[j][i] = 0.0;
 			L[j*n + i] = 0.0;
 		}
-		//Li[i][i] = 1.0 / L[i*n + i];
 		L[i*n + i] = 1.0 / L[i*n + i];
 	}
 }
